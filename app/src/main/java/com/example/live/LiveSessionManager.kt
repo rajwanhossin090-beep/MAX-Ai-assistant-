@@ -1,8 +1,10 @@
 package com.example.live
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Base64
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.example.BuildConfig
 import com.example.tools.ToolExecutionEngine
 import kotlinx.coroutines.CoroutineScope
@@ -91,10 +93,15 @@ class LiveSessionManager(
     fun startSession() {
         if (isSessionActive) return
         isSessionActive = true
-        addLog("SYSTEM", "Connecting to Gemini Live WebSocket...")
-        setSassyState(AssistantState.PROCESSING, "Connecting to my neural brain...")
-
-        audioEngine?.startRecording(scope)
+        
+        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            addLog("SYSTEM", "RECORD_AUDIO permission missing. Session starting in text-only mode.")
+            setSassyState(AssistantState.ERROR, "Honey, tap the top shield icon to grant mic permissions!")
+        } else {
+            addLog("SYSTEM", "Connecting to Gemini Live WebSocket...")
+            setSassyState(AssistantState.PROCESSING, "Connecting to my neural brain...")
+            audioEngine?.startRecording(scope)
+        }
 
         val apiKey = BuildConfig.GEMINI_API_KEY
         if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {

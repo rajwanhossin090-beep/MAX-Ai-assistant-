@@ -27,8 +27,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                var showPermissionsSheet by remember { mutableStateOf(false) }
                 val permissionsMap by viewModel.permissionsMap.collectAsState()
+                var showPermissionsSheet by remember {
+                    mutableStateOf(permissionsMap[android.Manifest.permission.RECORD_AUDIO] != true)
+                }
 
                 MainAssistantScreen(
                     viewModel = viewModel,
